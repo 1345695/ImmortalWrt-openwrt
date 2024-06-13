@@ -14,13 +14,13 @@ name: OpenWrt Builder
 
 on:
   schedule:
-    - cron: 0 2 * * 1,5
+    - cron: 0 2 * * 2,6
   repository_dispatch:
   workflow_dispatch:
 
 env:
-  REPO_URL: https://github.com/coolsnowwolf/lede
-  REPO_BRANCH: master
+  REPO_URL: https://github.com/immortalwrt/immortalwrt
+  REPO_BRANCH: openwrt-23.05
   FEEDS_CONF: feeds.conf.default
   CONFIG_FILE: .config
   DIY_P1_SH: diy-part1.sh
@@ -66,38 +66,36 @@ jobs:
         ./scripts/feeds update -a
         ./scripts/feeds install -a -f
         cd ..
+        sudo rm -rf openwrt/feeds/packages/net/v2ray-geodata
+        sudo rm -rf openwrt/feeds/packages/net/mosdns
+        sudo rm -rf openwrt/feeds/packages/net/smartdns
+        sudo rm -rf openwrt/feeds/packages/net/v2dat
+        sudo rm -rf openwrt/feeds/luci/themes/luci-theme-argon-mod
+        sudo rm -rf openwrt/feeds/luci/themes/luci-theme-argon
+        sudo rm -rf openwrt/feeds/luci/applications/luci-app-argon-config
+        sudo rm -rf openwrt/feeds/luci/applications/luci-app-smartdns
+        sudo rm -rf openwrt/feeds/luci/applications/luci-app-mosdns
+        sudo rm -rf openwrt/feeds/luci/applications/luci-app-openclash
         sudo git clone https://github.com/kenzok8/openwrt-packages pack
         sudo git clone -b v5 https://github.com/sbwml/luci-app-mosdns mosdns
-        sudo cp -r pack/luci-app-adguardhome/ openwrt/package/lean/luci-app-adguardhome
-        sudo cp -r pack/luci-app-openclash/ openwrt/package/lean/luci-app-openclash
-        sudo cp -r mosdns/luci-app-mosdns/ openwrt/package/lean/luci-app-mosdns
-        sudo cp -r mosdns/mosdns/ openwrt/package/lean/mosdns
-        sudo cp -r mosdns/v2dat/ openwrt/package/lean/v2dat
+        sudo cp -r pack/luci-app-adguardhome/ openwrt/feeds/luci/applications/luci-app-adguardhome
+        sudo cp -r pack/luci-app-openclash/ openwrt/feeds/luci/applications/luci-app-openclash
+        sudo cp -r mosdns/luci-app-mosdns/ openwrt/feeds/luci/applications/luci-app-mosdns
+        sudo cp -r mosdns/mosdns/ openwrt/feeds/packages/net/mosdns
+        sudo cp -r mosdns/v2dat/ openwrt/feeds/packages/net/v2dat
         cd openwrt
         sed -i 's/192.168.1.1/192.168.50.1/g' package/base-files/files/bin/config_generate
-        sed -i 's/$1$V4UetPzk$CYXluq4wUazHjmCDBCqXF.:0:0:99999:7:::/$1$eK1Ot.KS$t3PuFw0Az1qM6Plz2Ki9P0:19541:0:99999:7:::/g' package/lean/default-settings/files/zzz-default-settings
-        sed -i 's/KERNEL_PATCHVER:=6.1/KERNEL_PATCHVER:=6.6/g' target/linux/x86/Makefile
         sed -i '/customized in this file/a net.netfilter.nf_conntrack_max=655350' package/base-files/files/etc/sysctl.conf
-        sudo git clone https://github.com/sbwml/v2ray-geodata.git package/lean/v2ray-geodata
-        sudo git clone https://github.com/pymumu/openwrt-smartdns.git package/lean/smartdns
-        sudo git clone -b lede https://github.com/pymumu/luci-app-smartdns.git package/lean/luci-app-smartdns
-        sudo git clone -b 18.06 https://github.com/jerrykuku/luci-theme-argon.git package/lean/luci-theme-argon
-        sudo git clone -b 18.06 https://github.com/jerrykuku/luci-app-argon-config.git package/lean/luci-app-argon-config
-        sudo wget https://raw.githubusercontent.com/1345695/Actions-OpenWrt/main/background/1080.mp4 -P package/lean/luci-theme-argon/htdocs/luci-static/argon/background
-        sudo rm -rf feeds/packages/net/v2ray-geodata
-        sudo rm -rf feeds/packages/net/mosdns
-        sudo rm -rf feeds/packages/net/smartdns
-        sudo rm -rf feeds/packages/net/v2dat
-        sudo rm -rf feeds/luci/themes/luci-theme-argon-mod
-        sudo rm -rf feeds/luci/themes/luci-theme-argon
-        sudo rm -rf feeds/luci/applications/luci-app-argon-config
-        sudo rm -rf feeds/luci/applications/luci-app-smartdns
-        sudo rm -rf feeds/luci/applications/luci-app-mosdns
+        sudo git clone https://github.com/sbwml/v2ray-geodata.git feeds/packages/net/v2ray-geodata
+        sudo git clone https://github.com/pymumu/openwrt-smartdns.git feeds/packages/net/smartdns
+        sudo git clone https://github.com/pymumu/luci-app-smartdns.git feeds/luci/applications/luci-app-smartdns
+        sudo git clone https://github.com/jerrykuku/luci-theme-argon.git feeds/luci/themes/luci-theme-argon
+        sudo git clone https://github.com/jerrykuku/luci-app-argon-config.git feeds/luci/applications/luci-app-argon-config
+        sudo wget https://raw.githubusercontent.com/1345695/Actions-OpenWrt/main/background/1080.mp4 -P feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/background
         ./scripts/feeds update -a
         ./scripts/feeds install -a -f
         ls feeds/luci/themes
         ls feeds/luci/applications
-        ls package/lean
     - name: Load custom configuration
       run: |
         [ -e files ] && mv files openwrt/files
