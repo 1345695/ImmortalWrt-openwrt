@@ -1,0 +1,46 @@
+
+config interface 'loopback'
+	option device 'lo'
+	option proto 'static'
+	option ipaddr '127.0.0.1'
+	option netmask '255.0.0.0'
+
+config globals 'globals'
+	option packet_steering '1'
+
+config interface 'lan'
+	option device 'eth0'
+	option proto 'static'
+	option ipaddr '192.168.50.1'
+	option netmask '255.255.0.0'
+	list dns '127.0.0.1'
+	option delegate '0'
+
+config interface 'wan'
+	option device 'eth0'
+	option proto 'static'
+	option ipaddr '192.168.1.25'
+	option netmask '255.255.0.0'
+	option gateway '192.168.50.253'
+	option delegate '0'
+
+config interface 'lan2'
+	option device 'eth0'
+	option proto 'static'
+	option ifname 'eth0'
+	option ipaddr '10.0.0.1'
+	option netmask '255.255.255.0'
+	option delegate '0'
+
+config device
+	option name 'eth0'
+	option mtu '1500'
+	option multicast '0'
+
+config interface 'IPV6'
+	option proto 'dhcpv6'
+	option device 'eth0'
+	option reqaddress 'try'
+	option reqprefix 'auto'
+	option peerdns '0'
+
