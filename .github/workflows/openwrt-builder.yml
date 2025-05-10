@@ -110,7 +110,7 @@ jobs:
     - name: Load custom configuration
       run: |
         [ -e files ] && mv files openwrt/files
-        [ -e background ] && sudo mv background  openwrt/package/lean/luci-theme-argon/htdocs/luci-static/argon/background
+        [ -e background ] && sudo mv background  openwrt/feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/background
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
 
     - name: Download package
