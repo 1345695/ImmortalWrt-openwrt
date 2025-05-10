@@ -78,17 +78,10 @@ jobs:
     - name: Load custom feeds
       run: |
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
-        sudo rm -rf openwrt/feeds/packages/net/v2ray-geodata
-        sudo rm -rf openwrt/feeds/packages/net/mosdns
-        sudo rm -rf openwrt/feeds/packages/net/smartdns
-        sudo rm -rf openwrt/feeds/packages/net/v2dat
-        sudo rm -rf openwrt/feeds/packages/lang/golang
-        sudo rm -rf openwrt/feeds/luci/themes/luci-theme-argon-mod
-        sudo rm -rf openwrt/feeds/luci/themes/luci-theme-argon
-        sudo rm -rf openwrt/feeds/luci/applications/luci-app-argon-config
-        sudo rm -rf openwrt/feeds/luci/applications/luci-app-smartdns
-        sudo rm -rf openwrt/feeds/luci/applications/luci-app-mosdns
-        sudo rm -rf openwrt/feeds/luci/applications/luci-app-openclash
+        cd openwrt
+        ./scripts/feeds update -a && ./scripts/feeds install -a -f
+        cd ..
+        sudo rm -rf openwrt/feeds/packages/net/v2ray-geodata openwrt/feeds/packages/net/mosdns openwrt/feeds/packages/net/smartdns openwrt/feeds/packages/net/v2dat openwrt/feeds/packages/lang/golang openwrt/feeds/luci/themes/luci-theme-argon-mod openwrt/feeds/luci/themes/luci-theme-argon openwrt/feeds/luci/applications/luci-app-argon-config openwrt/feeds/luci/applications/luci-app-smartdns openwrt/feeds/luci/applications/luci-app-mosdns openwrt/feeds/luci/applications/luci-app-openclash
         sudo git clone https://github.com/kenzok8/openwrt-packages pack
         sudo git clone -b master --single-branch --filter=blob:none https://github.com/immortalwrt/packages golang
         sudo git clone -b v5 https://github.com/sbwml/luci-app-mosdns mosdns
@@ -101,10 +94,7 @@ jobs:
         sudo cp -r mosdns/mosdns/ openwrt/feeds/packages/net/mosdns
         sudo cp -r mosdns/v2dat/ openwrt/feeds/packages/net/v2dat
         sudo cp -r golang/lang/golang/ openwrt/feeds/packages/lang/golang
-        sudo rm -rf pack
-        sudo rm -rf golang
-        sudo rm -rf mosdns
-        sudo rm -rf OpenClash
+        sudo rm -rf pack golang mosdns OpenClash
         cd openwrt
         sudo sed -i 's/CONFIG_CPU_FREQ_DEFAULT_GOV_SCHEDUTIL/CONFIG_CPU_FREQ_DEFAULT_GOV_PERFORMANCE/g' target/linux/x86/64/config-6.6
         sudo sed -i '/CONFIG_CPU_FREQ_GOV_SCHEDUTIL/a\CONFIG_CPU_FREQ_GOV_PERFORMANCE=y' target/linux/x86/64/config-6.6
@@ -116,8 +106,7 @@ jobs:
         sudo git clone https://github.com/pymumu/luci-app-smartdns.git feeds/luci/applications/luci-app-smartdns
         sudo git clone https://github.com/jerrykuku/luci-theme-argon.git feeds/luci/themes/luci-theme-argon
         sudo git clone https://github.com/jerrykuku/luci-app-argon-config.git feeds/luci/applications/luci-app-argon-config
-        ./scripts/feeds update -a
-        ./scripts/feeds install -a -f
+        ./scripts/feeds update -a && ./scripts/feeds install -a -f
     - name: Load custom configuration
       run: |
         [ -e files ] && mv files openwrt/files
