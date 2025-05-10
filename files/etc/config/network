@@ -29,7 +29,7 @@ config interface 'lan2'
 	option proto 'static'
 	option ifname 'eth0'
 	option ipaddr '10.0.0.1'
-	option netmask '255.255.255.0'
+	option netmask '255.255.0.0'
 	option delegate '0'
 
 config device
