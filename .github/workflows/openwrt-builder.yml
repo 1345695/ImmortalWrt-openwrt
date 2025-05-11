@@ -119,10 +119,6 @@ jobs:
     - name: Load custom feeds
       run: |
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
-        wget https://github.com/coolsnowwolf/lede/archive/111e93f75dee275531d5ab06d398a772ca3ddf21.zip -O ledess.zip
-        unzip ledess.zip
-        sudo rm -rf openwrt/package/kernel/r8168
-        sudo cp -r lede-111e93f75dee275531d5ab06d398a772ca3ddf21/package/kernel/r8168/ openwrt/package/kernel/r8168
         cd openwrt
         ./scripts/feeds update -a && ./scripts/feeds install -a -f
         cd ..
