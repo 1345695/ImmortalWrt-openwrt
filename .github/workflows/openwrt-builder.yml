@@ -123,10 +123,10 @@ jobs:
         echo "src-git nikki https://github.com/nikkinikki-org/OpenWrt-nikki.git;main" >> "feeds.conf.default"
         ./scripts/feeds update -a && ./scripts/feeds install -a -f
         cd ..
-        wget https://github.com/coolsnowwolf/lede/archive/111e93f75dee275531d5ab06d398a772ca3ddf21.zip -O ledess.zip
+        wget https://github.com/immortalwrt/immortalwrt/archive/943957068961b40645bdb19704ad2f09c6fdef94.zip -O ledess.zip
         unzip ledess.zip
         sudo rm -rf openwrt/package/kernel/r8168
-        sudo cp -r lede-111e93f75dee275531d5ab06d398a772ca3ddf21/package/kernel/r8168/ openwrt/package/kernel/r8168
+        sudo cp -r immortalwrt-943957068961b40645bdb19704ad2f09c6fdef94/package/kernel/r8168/ openwrt/package/kernel/r8168
         sudo rm -rf openwrt/feeds/packages/net/v2ray-geodata openwrt/feeds/packages/net/mosdns openwrt/feeds/packages/net/smartdns openwrt/feeds/packages/net/v2dat openwrt/feeds/packages/lang/golang openwrt/feeds/luci/themes/luci-theme-argon-mod openwrt/feeds/luci/themes/luci-theme-argon openwrt/feeds/luci/applications/luci-app-argon-config openwrt/feeds/luci/applications/luci-app-smartdns openwrt/feeds/luci/applications/luci-app-mosdns
         sudo git clone https://github.com/kenzok8/openwrt-packages pack
         sudo git clone -b master --single-branch --filter=blob:none https://github.com/immortalwrt/packages golang
