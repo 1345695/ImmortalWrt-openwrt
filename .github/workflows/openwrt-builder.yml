@@ -35,69 +35,99 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
+    - name: 检查服务器配置
+      run: |
+        echo "已知CPU型号（降序）：7763,8370C,8272CL,8171M,E5系列"
+        echo "--------------------------CPU信息--------------------------"
+        echo "CPU物理数量:$(cat /proc/cpuinfo| grep "physical id"| sort| uniq| wc -l)"
+        echo -e "CPU核心及版本信息：$(cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq -c) \n"
+        echo "--------------------------硬盘信息--------------------------"
+        echo -e "$(df -hT)"
+    - name: Before freeing up disk space
+      run: |
+        echo "Before freeing up disk space"
+        echo "=============================================================================="
+        df -hT
+        echo "=============================================================================="
+
+    - name: "Optimize Disk Space"
+      uses: "hugoalh/disk-space-optimizer-ghaction@v0.8.1"
+      with:
+        operate_sudo: "True"
+        general_include: ".+"
+        general_exclude: |-
+          ^GCC$
+          ^G\+\+$
+          Clang
+          LLVM
+        docker_include: ".+"
+        docker_prune: "True"
+        docker_clean: "True"
+        apt_prune: "True"
+        apt_clean: "True"
+        homebrew_prune: "True"
+        homebrew_clean: "True"
+        npm_prune: "True"
+        npm_clean: "True"
+        os_swap: "True"
+
+    - name: Freeing up disk space
+      uses: easimon/maximize-build-space@master
+      with: 
+        root-reserve-mb: 2048
+        swap-size-mb: 1
+        remove-dotnet: 'true'
+        remove-android: 'true'
+        remove-haskell: 'true'
+        remove-codeql: 'true'
+        remove-docker-images: 'true'
+
+    - name: Free up disk space complete
+      run: |
+        echo "Free up disk space complete"
+        echo "=============================================================================="
+        df -hT
+        echo "=============================================================================="
+
     - name: Checkout
       uses: actions/checkout@main
-
-      
-    - name: Free Disk Space Before Build
-      run: |
-        echo "Disk space before cleanup:"
-        df -h
-        sudo rm -rf /usr/local/.ghcup
-        sudo rm -rf /opt/hostedtoolcache/CodeQL
-        sudo rm -rf /usr/local/lib/android/sdk/ndk
-        sudo rm -rf /usr/share/dotnet
-        sudo rm -rf /opt/ghc
-        sudo rm -rf /usr/local/share/boost
-        sudo apt-get clean
-        echo "Disk space after cleanup:"
-        df -h
 
     - name: Initialization environment
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
-        sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
-        sudo docker image prune --all --force
         sudo -E apt-get -qq update
-        sudo -E apt-get -qq install ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libfuse-dev libglib2.0-dev libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libpython3-dev libreadline-dev libssl-dev libtool lrzsz mkisofs msmtp ninja-build p7zip p7zip-full patch pkgconf python2.7 python3 python3-pyelftools python3-setuptools qemu-utils rsync scons squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
+        sudo -E apt-get -qq install ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
+        bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib \
+        git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libglib2.0-dev libgmp3-dev libltdl-dev \
+        libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool lrzsz \
+        mkisofs msmtp nano ninja-build p7zip p7zip-full patch pkgconf python2.7 python3 python3-pyelftools \
+        libpython3-dev qemu-utils rsync scons squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip \
+        vim wget xmlto xxd zlib1g-dev python3-setuptools
         sudo -E apt-get -qq autoremove --purge
         sudo -E apt-get -qq clean
+        sudo rm -rf /etc/apt/sources.list.d/* /usr/local/lib/android /opt/ghc /usr/share/dotnet /usr/local/graalvm /usr/local/.ghcup \
+        /usr/local/share/powershell /usr/local/share/chromium /usr/local/lib/node_modules
         sudo timedatectl set-timezone "$TZ"
-        sudo mkdir -p /workdir
-        sudo chown $USER:$GROUPS /workdir
+        sudo chown $USER:$GROUPS $GITHUB_WORKSPACE
 
     - name: Clone source code
-      working-directory: /workdir
+      working-directory: ./
       run: |
         df -hT $PWD
         git clone -b $REPO_BRANCH --single-branch --filter=blob:none $REPO_URL openwrt
-        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
-
     - name: Load custom feeds
       run: |
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
         cd openwrt
-<<<<<<< HEAD
+        echo "src-git nikki https://github.com/nikkinikki-org/OpenWrt-nikki.git;main" >> "feeds.conf.default"
         ./scripts/feeds update -a && ./scripts/feeds install -a -f
         cd ..
-        sudo rm -rf openwrt/feeds/packages/net/v2ray-geodata openwrt/feeds/packages/net/mosdns openwrt/feeds/packages/net/smartdns openwrt/feeds/packages/net/v2dat openwrt/feeds/packages/lang/golang openwrt/feeds/luci/themes/luci-theme-argon-mod openwrt/feeds/luci/themes/luci-theme-argon openwrt/feeds/luci/applications/luci-app-argon-config openwrt/feeds/luci/applications/luci-app-smartdns openwrt/feeds/luci/applications/luci-app-mosdns openwrt/feeds/luci/applications/luci-app-openclash
-=======
-        echo "src-git nikki https://github.com/nikkinikki-org/OpenWrt-nikki.git;main" >> "feeds.conf.default"
-        ./scripts/feeds update -a
-        ./scripts/feeds install -a -f
-        cd ..
-        sudo rm -rf openwrt/feeds/packages/net/v2ray-geodata
-        sudo rm -rf openwrt/feeds/packages/net/mosdns
-        sudo rm -rf openwrt/feeds/packages/net/smartdns
-        sudo rm -rf openwrt/feeds/packages/net/v2dat
-        sudo rm -rf openwrt/feeds/packages/lang/golang
-        sudo rm -rf openwrt/feeds/luci/themes/luci-theme-argon-mod
-        sudo rm -rf openwrt/feeds/luci/themes/luci-theme-argon
-        sudo rm -rf openwrt/feeds/luci/applications/luci-app-argon-config
-        sudo rm -rf openwrt/feeds/luci/applications/luci-app-smartdns
-        sudo rm -rf openwrt/feeds/luci/applications/luci-app-mosdns
->>>>>>> parent of 8bd0b9b (Update openwrt-builder.yml)
+        wget https://github.com/coolsnowwolf/lede/archive/111e93f75dee275531d5ab06d398a772ca3ddf21.zip -O ledess.zip
+        unzip ledess.zip
+        sudo rm -rf openwrt/package/kernel/r8168
+        sudo cp -r lede-111e93f75dee275531d5ab06d398a772ca3ddf21/package/kernel/r8168/ openwrt/package/kernel/r8168
+        sudo rm -rf openwrt/feeds/packages/net/v2ray-geodata openwrt/feeds/packages/net/mosdns openwrt/feeds/packages/net/smartdns openwrt/feeds/packages/net/v2dat openwrt/feeds/packages/lang/golang openwrt/feeds/luci/themes/luci-theme-argon-mod openwrt/feeds/luci/themes/luci-theme-argon openwrt/feeds/luci/applications/luci-app-argon-config openwrt/feeds/luci/applications/luci-app-smartdns openwrt/feeds/luci/applications/luci-app-mosdns
         sudo git clone https://github.com/kenzok8/openwrt-packages pack
         sudo git clone -b master --single-branch --filter=blob:none https://github.com/immortalwrt/packages golang
         sudo git clone -b v5 https://github.com/sbwml/luci-app-mosdns mosdns
@@ -108,13 +138,7 @@ jobs:
         sudo cp -r mosdns/mosdns/ openwrt/feeds/packages/net/mosdns
         sudo cp -r mosdns/v2dat/ openwrt/feeds/packages/net/v2dat
         sudo cp -r golang/lang/golang/ openwrt/feeds/packages/lang/golang
-<<<<<<< HEAD
-        sudo rm -rf pack golang mosdns OpenClash
-=======
-        sudo rm -rf pack
-        sudo rm -rf golang
-        sudo rm -rf mosdns
->>>>>>> parent of 8bd0b9b (Update openwrt-builder.yml)
+        sudo rm -rf pack golang mosdns
         cd openwrt
         sudo sed -i 's/CONFIG_CPU_FREQ_DEFAULT_GOV_SCHEDUTIL/CONFIG_CPU_FREQ_DEFAULT_GOV_PERFORMANCE/g' target/linux/x86/64/config-6.6
         sudo sed -i '/CONFIG_CPU_FREQ_GOV_SCHEDUTIL/a\CONFIG_CPU_FREQ_GOV_PERFORMANCE=y' target/linux/x86/64/config-6.6
@@ -126,22 +150,11 @@ jobs:
         sudo git clone https://github.com/pymumu/luci-app-smartdns.git feeds/luci/applications/luci-app-smartdns
         sudo git clone https://github.com/jerrykuku/luci-theme-argon.git feeds/luci/themes/luci-theme-argon
         sudo git clone https://github.com/jerrykuku/luci-app-argon-config.git feeds/luci/applications/luci-app-argon-config
-<<<<<<< HEAD
         ./scripts/feeds update -a && ./scripts/feeds install -a -f
     - name: Load custom configuration
       run: |
         [ -e files ] && mv files openwrt/files
         [ -e background ] && sudo mv background  openwrt/feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/background
-=======
-        sudo wget https://raw.githubusercontent.com/1345695/Actions-OpenWrt/main/background/1080.mp4 -P feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/background
-        ./scripts/feeds update -a
-        ./scripts/feeds install -a -f
-        ls feeds/luci/themes
-        ls feeds/luci/applications
-    - name: Load custom configuration
-      run: |
-        [ -e files ] && mv files openwrt/files
->>>>>>> parent of 8bd0b9b (Update openwrt-builder.yml)
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
 
     - name: Download package
@@ -164,21 +177,6 @@ jobs:
         [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
         echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
       
-    - name: Free Disk Space Before Build
-      run: |
-        echo "Disk space before cleanup:"
-        df -h
-        sudo rm -rf /usr/local/.ghcup
-        sudo rm -rf /opt/hostedtoolcache/CodeQL
-        sudo rm -rf /usr/local/lib/android/sdk/ndk
-        sudo rm -rf /usr/share/dotnet
-        sudo rm -rf /opt/ghc
-        sudo rm -rf /usr/local/share/boost
-        sudo apt-get clean
-        echo "Disk space after cleanup:"
-        df -h
-
-
     - name: Check space usage
       if: (!cancelled())
       run: df -hT
