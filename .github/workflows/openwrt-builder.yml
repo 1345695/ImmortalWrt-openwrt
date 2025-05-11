@@ -126,7 +126,8 @@ jobs:
         cd openwrt
         ./scripts/feeds update -a && ./scripts/feeds install -a -f
         cd ..
-        sudo rm -rf openwrt/feeds/packages/net/v2ray-geodata openwrt/feeds/packages/net/mosdns openwrt/feeds/packages/net/smartdns openwrt/feeds/packages/net/v2dat openwrt/feeds/packages/lang/golang openwrt/feeds/luci/themes/luci-theme-argon-mod openwrt/feeds/luci/themes/luci-theme-argon openwrt/feeds/luci/applications/luci-app-argon-config openwrt/feeds/luci/applications/luci-app-smartdns openwrt/feeds/luci/applications/luci-app-mosdns openwrt/feeds/luci/applications/luci-app-openclash        sudo git clone https://github.com/kenzok8/openwrt-packages pack
+        sudo rm -rf openwrt/feeds/packages/net/v2ray-geodata openwrt/feeds/packages/net/mosdns openwrt/feeds/packages/net/smartdns openwrt/feeds/packages/net/v2dat openwrt/feeds/packages/lang/golang openwrt/feeds/luci/themes/luci-theme-argon-mod openwrt/feeds/luci/themes/luci-theme-argon openwrt/feeds/luci/applications/luci-app-argon-config openwrt/feeds/luci/applications/luci-app-smartdns openwrt/feeds/luci/applications/luci-app-mosdns openwrt/feeds/luci/applications/luci-app-openclash
+        sudo git clone https://github.com/kenzok8/openwrt-packages pack
         sudo git clone -b master --single-branch --filter=blob:none https://github.com/immortalwrt/packages golang
         sudo git clone -b v5 https://github.com/sbwml/luci-app-mosdns mosdns
         sudo git clone -b dev --single-branch --filter=blob:none https://github.com/vernesong/OpenClash OpenClash
